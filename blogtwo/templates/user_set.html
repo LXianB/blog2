@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}
+    <title>账号设置</title>
+{% endblock %}
+
+{% block page-main %}
+    <form class="form-horizontal" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="inputUsername" class="col-sm-2 control-label">用户名</label>
+            <div class="col-sm-10">
+                <input type="email" class="form-control" id="inputUsername" placeholder="用户名">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">Email</label>
+            <div class="col-sm-10">
+                <input type="email" class="form-control" id="inputEmail3" placeholder="Email">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputPassword" class="col-sm-2 control-label">初始密码</label>
+            <div class="col-sm-10">
+                <input type="password" class="form-control" id="inputPassword" placeholder="初始密码">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputPassword3" class="col-sm-2 control-label">修改密码</label>
+            <div class="col-sm-10">
+                <input type="password" class="form-control" id="inputPassword3" placeholder="修改密码">
+            </div>
+        </div>
+        <div class="form-group">
+            <label
+                    class="col-sm-2 control-label">头像</label>
+            <div class="col-sm-10">
+                <label for="id_avatar"><img id="avatar-img" src="/article/media/{{ request.user.avatar }}" alt=""></label>
+                <input accept="image/*" type="file" name="avatar" id="id_avatar" style="display: none">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="button" class="btn btn-info" id="modify-submit">确认修改</button>
+            </div>
+        </div>
+    </form>
+    <h4>{{ errmsg }}</h4>
+    <script src="/static/jquery-3.3.1.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script>
+    // 找到头像的input标签绑定change事件
+    $("#id_avatar").change(function () {
+        // 1. 创建一个读取文件的对象
+        var fileReader = new FileReader();
+        // 取到当前选中的头像文件
+        // console.log(this.files[0]);
+        // 读取你选中的那个文件
+        fileReader.readAsDataURL(this.files[0]);  // 读取文件是需要时间的
+        fileReader.load = function () {
+            // 2. 等上一步读完文件之后才 把图片加载到img标签中
+            $("#avatar-img").attr("src", fileReader.result);
+        };
+    });
+    // AJAX提交注册的数据
+    $("#modify-submit").click(function () {
+        // 取到用户填写的注册数据，向后端发送AJAX请求
+        {#var formData = new FormData();#}
+        {#$.ajaxSetup({data: {csrfmiddlewaretoken: '{{ csrf_token }}' }});#}
+        {#alert('heihei');#}
+        alert("hahaha");
+        var formData = new FormData();
+        formData.append("username", $("#inputUsername").val());
+        formData.append("password", $("#inputPassword").val());
+        formData.append("re_password", $("#inputPassword3").val());
+        formData.append("email", $("#inputEmail3").val());
+        //alert("heihei");
+        formData.append("avatar", $("#id_avatar")[0].files[0]);
+        //alert("hahaahheiheihei");
+        formData.append("csrfmiddlewaretoken", $("[name='csrfmiddlewaretoken']").val());
+
+        $.ajax({
+            url: "/user/account/set/",
+            type: "post",
+            processData: false,  // 告诉jQuery不要处理我的数据
+            contentType: false,  // 告诉jQuery不要设置content类型
+            dataType: "json",
+            data: formData,
+            success: function (data) {
+                if (data.status) {
+                    $("h4").text(data.errmsg);
+
+
+                } else {
+                    // 没有错误就跳转到指定页面
+                    location.href = data.msg;
+                }
+            }
+        })
+    });
+    // 将所有的input框绑定获取焦点的事件，将所有的错误信息清空
+    $("form input").focus(function () {
+        $("h4").text("")
+    });
+
+    </script>
+
+{% endblock %}
